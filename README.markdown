@@ -2,8 +2,6 @@
 
 A implementation of Authenticated Encryption
 
-    https://csrc.nist.gov/csrc/media/projects/block-cipher-techniques/documents/bcm/proposed-modes/eax/eax-spec.pdf
-
 ## Usage
 
 Encrypt
@@ -22,3 +20,9 @@ Decrypt
 ```
 
 ## Installation
+
+
+## Cite
+
+* https://en.wikipedia.org/wiki/Authenticated_encryption
+* https://csrc.nist.gov/csrc/media/projects/block-cipher-techniques/documents/bcm/proposed-modes/eax/eax-spec.pdf
