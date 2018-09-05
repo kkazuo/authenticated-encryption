@@ -3,14 +3,12 @@
 |#
 
 (defsystem "authenticated-encryption-test"
-  :defsystem-depends-on ("prove-asdf")
-  :author ""
-  :license ""
-  :depends-on ("authenticated-encryption"
-               "prove")
+  :author "Koga Kazuo"
+  :license "MIT"
+  :depends-on (:authenticated-encryption
+               :1am)
   :components ((:module "tests"
                 :components
-                ((:test-file "authenticated-encryption"))))
+                ((:file "authenticated-encryption"))))
   :description "Test system for authenticated-encryption"
-
-  :perform (test-op (op c) (symbol-call :prove-asdf :run-test-system c)))
+  :perform (test-op (op c) (symbol-call :1am :run)))
