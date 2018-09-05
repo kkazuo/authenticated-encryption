@@ -34,9 +34,6 @@
                 :element-type '(unsigned-byte 8)
                 :initial-element pad-byte)))
 
-(defun byte-xor (length x1 x2 out &key (x2-start 0))
-  (crypto::xor-block length x1 x2 x2-start out 0))
-
 (defun authenticated-encrypt (message &key secret nonce (cipher-name :aes))
   (let* ((cmac (crypto:make-cmac secret cipher-name))
          (block-length (crypto:block-length cipher-name))
@@ -79,9 +76,8 @@
             (write-sequence buffer s :end n-bytes-produced))
 
           (let ((C (crypto:cmac-digest cmac)))
-            (byte-xor block-length N C buffer)
-            (byte-xor block-length buffer H N)
-            (write-sequence N s)
+            (map-into buffer #'logxor N C H)
+            (write-sequence buffer s :end block-length)
             (crypto:get-output-stream-octets s)))))))
 
 (define-condition authenticated-decrypt-error (simple-error)
@@ -123,10 +119,10 @@
                 (buffer (make-array (* 2 block-length) :element-type '(unsigned-byte 8))))
             (crypto:update-cmac cmac encrypted :start (+ 2 block-length) :end (- length block-length))
             (let ((C (crypto:cmac-digest cmac)))
-              (byte-xor block-length N C buffer)
-              (byte-xor block-length buffer H C)
-              (byte-xor block-length C encrypted H :x2-start (- length block-length))
-              (unless (= 0 (loop for v across H sum v))
+              (map-into buffer #'logxor N C H)
+              (unless (= 0 (loop for i from (- length block-length) to (- length 1)
+                                 for v across buffer
+                                 sum (logxor v (aref encrypted i))))
                 (error (make-condition 'invalid-signature-error)))
 
               (let ((cipher (crypto:make-cipher cipher-name
