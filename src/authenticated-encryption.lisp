@@ -35,6 +35,20 @@
                 :initial-element pad-byte)))
 
 (defun authenticated-encrypt (message &key secret nonce (cipher-name :aes))
+  "Encrypt the message with secret key
+
+MESSAGE and SECRET must be array of (unsigned-byte 8).
+NONCE will generate per evaluate if nil (default).
+CIPHER-NAME accepts only :AES (default) for now.
+
+Returns the encrypted bytes.
+
+Encrypted Bytes Format are:
+  Header (2 byte) +
+  Nonce  (16 byte) +
+  Encrypted Message (with PKCS#7 padding) +
+  Tag    (16 byte)
+  (16 = AES block size)"
   (let* ((cmac (crypto:make-cmac secret cipher-name))
          (block-length (crypto:block-length cipher-name))
          (nonce (or nonce (make-nonce block-length))))
@@ -99,6 +113,14 @@
   ())
 
 (defun authenticated-decrypt (encrypted &key secret)
+  "Decrypt message with secret key
+
+ENCRYPTED and SECRET must be array of (unsigned-byte 8).
+
+Returns the decrypted bytes.
+
+Conditions:
+  authenticated-decrypt-error when invalid encrypted bytes"
   (let ((length (length encrypted)))
     (unless (< 2 length)
       (error (make-condition 'invalid-header-error)))
